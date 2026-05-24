@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tar -xf \"C:/Users/hp/.claude/projects/c--Users-hp-nifty-and-co/design_extracted/design.tar\" -C \"C:/Users/hp/.claude/projects/c--Users-hp-nifty-and-co/design_extracted/\")"
+    ]
+  }
+}
