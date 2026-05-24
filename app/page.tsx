@@ -11,12 +11,42 @@ import {
 } from '@/components/Sections';
 import { IconArrow, IconCalendar, IconWhatsapp, IconCheck } from '@/components/Icons';
 import { supabase } from '@/lib/supabase';
+import { ContentProvider, useContent } from '@/lib/content-context';
 
-export default function Home() {
-  const [scrolled, setScrolled] = useState(false);
+function HomeInner() {
+  const [scrolled, setScrolled]   = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving]       = useState(false);
+
+  // nav
+  const brandName = useContent('nav', 'brand_name', 'Nifty & Co.');
+  const brandSub  = useContent('nav', 'brand_sub',  'Chhajed Venture Capital');
+
+  // hero
+  const eyebrow   = useContent('hero', 'eyebrow',   'SEBI Registered · Since 2021');
+  const h1        = useContent('hero', 'heading_1',  'Your trusted');
+  const h2        = useContent('hero', 'heading_2',  'partner in');
+  const h3        = useContent('hero', 'heading_3',  'wealth creation.');
+  const heroSub   = useContent('hero', 'subtext',    'Five years of expertise in equity trading, SIPs, mutual funds and portfolio management — for investors who\'d rather compound quietly than chase the next tip.');
+  const s1n = useContent('hero', 'stat_1_num', '5+');
+  const s1l = useContent('hero', 'stat_1_lbl', 'Years of expertise');
+  const s2n = useContent('hero', 'stat_2_num', '1,000+');
+  const s2l = useContent('hero', 'stat_2_lbl', 'Investors served');
+  const s3n = useContent('hero', 'stat_3_num', '₹240Cr');
+  const s3l = useContent('hero', 'stat_3_lbl', 'Assets advised');
+  const s4n = useContent('hero', 'stat_4_num', '98%');
+  const s4l = useContent('hero', 'stat_4_lbl', 'Client retention');
+  const trustMark = useContent('hero', 'trust_mark', 'SEBI-registered, audited, and entirely commission-free.');
+
+  // modal
+  const modalEyebrow  = useContent('modal', 'eyebrow',        'Free consultation · No commitment');
+  const modalH        = useContent('modal', 'heading',         'Let\'s talk');
+  const modalHa       = useContent('modal', 'heading_accent',  'wealth.');
+  const modalSubtext  = useContent('modal', 'subtext',         'Tell us a little about yourself and we\'ll match you with the right advisor.');
+
+  // footer whatsapp
+  const waNumber = useContent('footer', 'whatsapp', '919822014728');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -24,7 +54,6 @@ export default function Home() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Scroll reveal
   useEffect(() => {
     const reveal = (el: Element) => el.classList.add('in');
     const inView = (el: Element) => {
@@ -47,7 +76,6 @@ export default function Home() {
     return () => { cancelAnimationFrame(raf1); clearTimeout(safety); obs.disconnect(); };
   }, []);
 
-  // Subtle parallax — chart card lifts as you scroll
   useEffect(() => {
     const card = document.querySelector<HTMLElement>('.hero .chart-card');
     if (!card) return;
@@ -73,8 +101,8 @@ export default function Home() {
           <a href="#" className="brand">
             <div className="brand-mark"><span>N</span></div>
             <div>
-              <div className="brand-name">Nifty &amp; Co.</div>
-              <div className="brand-sub">Chhajed Venture Capital</div>
+              <div className="brand-name">{brandName}</div>
+              <div className="brand-sub">{brandSub}</div>
             </div>
           </a>
           <nav className="nav-links">
@@ -104,17 +132,15 @@ export default function Home() {
           <div className="container">
             <div className="hero-grid">
               <div style={{ position: 'relative' }}>
-                <div className="eyebrow reveal">SEBI Registered · Since 2021</div>
+                <div className="eyebrow reveal">{eyebrow}</div>
                 <h1 style={{ marginTop: 16 }}>
                   <LineReveal lines={[
-                    { text: 'Your trusted' },
-                    { text: 'partner in' },
-                    { text: 'wealth creation.', cls: 'shimmer' },
+                    { text: h1 },
+                    { text: h2 },
+                    { text: h3, cls: 'shimmer' },
                   ]} />
                 </h1>
-                <p className="lead reveal d2" style={{ marginTop: 24 }}>
-                  Five years of expertise in equity trading, SIPs, mutual funds and portfolio management — for investors who&apos;d rather compound quietly than chase the next tip.
-                </p>
+                <p className="lead reveal d2" style={{ marginTop: 24 }}>{heroSub}</p>
                 <div className="hero-cta reveal d3">
                   <Magnetic>
                     <a href="#start" className="btn btn-primary">
@@ -128,30 +154,17 @@ export default function Home() {
                   </Magnetic>
                 </div>
                 <div className="trust-row reveal d4">
-                  <div className="trust-item">
-                    <div className="num">5+</div>
-                    <div className="lbl">Years of expertise</div>
-                  </div>
-                  <div className="trust-item">
-                    <div className="num">1,000+</div>
-                    <div className="lbl">Investors served</div>
-                  </div>
-                  <div className="trust-item">
-                    <div className="num">₹240Cr</div>
-                    <div className="lbl">Assets advised</div>
-                  </div>
-                  <div className="trust-item">
-                    <div className="num">98%</div>
-                    <div className="lbl">Client retention</div>
-                  </div>
+                  <div className="trust-item"><div className="num">{s1n}</div><div className="lbl">{s1l}</div></div>
+                  <div className="trust-item"><div className="num">{s2n}</div><div className="lbl">{s2l}</div></div>
+                  <div className="trust-item"><div className="num">{s3n}</div><div className="lbl">{s3l}</div></div>
+                  <div className="trust-item"><div className="num">{s4n}</div><div className="lbl">{s4l}</div></div>
                 </div>
-
                 <div style={{ marginTop: 32 }} className="reveal d4 hide-md">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
                     <SpinSeal />
                     <div style={{ maxWidth: 200 }}>
                       <div style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 6 }}>Trust mark</div>
-                      <div style={{ fontFamily: 'var(--serif)', fontSize: 18, lineHeight: 1.3, color: 'var(--ink)' }}>SEBI-registered, audited, and entirely commission-free.</div>
+                      <div style={{ fontFamily: 'var(--serif)', fontSize: 18, lineHeight: 1.3, color: 'var(--ink)' }}>{trustMark}</div>
                     </div>
                   </div>
                 </div>
@@ -228,7 +241,7 @@ export default function Home() {
       <SiteFooter />
 
       {/* FLOATING WHATSAPP */}
-      <a href="https://wa.me/919822014728" target="_blank" rel="noopener noreferrer" className="whatsapp-fab" aria-label="WhatsApp">
+      <a href={`https://wa.me/${waNumber}`} target="_blank" rel="noopener noreferrer" className="whatsapp-fab" aria-label="WhatsApp">
         <span className="ring"></span>
         <IconWhatsapp />
       </a>
@@ -247,20 +260,18 @@ export default function Home() {
 
           {submitted ? (
             <div className="modal-success">
-              <div className="success-icon">
-                <IconCheck size={24} />
-              </div>
+              <div className="success-icon"><IconCheck size={24} /></div>
               <h3>We&apos;ll be in touch.</h3>
               <p>Thanks for reaching out. Our advisor will call you within one business day.</p>
-              <button className="btn btn-ghost" style={{ marginTop: 8 }} onClick={() => setModalOpen(false)}>
-                Close
-              </button>
+              <button className="btn btn-ghost" style={{ marginTop: 8 }} onClick={() => setModalOpen(false)}>Close</button>
             </div>
           ) : (
             <>
-              <div className="modal-eyebrow">Free consultation · No commitment</div>
-              <h2 className="modal-title">Let&apos;s talk <span className="shimmer">wealth.</span></h2>
-              <p className="modal-sub">Tell us a little about yourself and we&apos;ll match you with the right advisor.</p>
+              <div className="modal-eyebrow">{modalEyebrow}</div>
+              <h2 className="modal-title">
+                {modalH} <span className="shimmer">{modalHa}</span>
+              </h2>
+              <p className="modal-sub">{modalSubtext}</p>
 
               <form
                 onSubmit={async (e) => {
@@ -330,5 +341,13 @@ export default function Home() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <ContentProvider>
+      <HomeInner />
+    </ContentProvider>
   );
 }
