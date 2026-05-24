@@ -10,11 +10,13 @@ import {
   TestimonialsSection, InsightsSection, CTASection, FAQSection, SiteFooter,
 } from '@/components/Sections';
 import { IconArrow, IconCalendar, IconWhatsapp, IconCheck } from '@/components/Icons';
+import { supabase } from '@/lib/supabase';
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -261,26 +263,40 @@ export default function Home() {
               <p className="modal-sub">Tell us a little about yourself and we&apos;ll match you with the right advisor.</p>
 
               <form
-                onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setSaving(true);
+                  const fd = new FormData(e.currentTarget);
+                  await supabase.from('nifty_and_co_leads').insert({
+                    name:    fd.get('name')    as string,
+                    phone:   fd.get('phone')   as string,
+                    email:   fd.get('email')   as string,
+                    goal:    fd.get('goal')    as string,
+                    amount:  fd.get('amount')  as string,
+                    message: fd.get('message') as string,
+                  });
+                  setSaving(false);
+                  setSubmitted(true);
+                }}
               >
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="lt-name">Full name</label>
-                    <input id="lt-name" type="text" placeholder="Rahul Sharma" required />
+                    <input id="lt-name" name="name" type="text" placeholder="Rahul Sharma" required />
                   </div>
                   <div className="form-group">
                     <label htmlFor="lt-phone">Phone</label>
-                    <input id="lt-phone" type="tel" placeholder="+91 98000 00000" required />
+                    <input id="lt-phone" name="phone" type="tel" placeholder="+91 98000 00000" required />
                   </div>
                 </div>
                 <div className="form-group">
                   <label htmlFor="lt-email">Email</label>
-                  <input id="lt-email" type="email" placeholder="rahul@example.com" required />
+                  <input id="lt-email" name="email" type="email" placeholder="rahul@example.com" required />
                 </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="lt-goal">Investment goal</label>
-                    <select id="lt-goal" required defaultValue="">
+                    <select id="lt-goal" name="goal" required defaultValue="">
                       <option value="" disabled>Select one</option>
                       <option>Wealth creation</option>
                       <option>Retirement planning</option>
@@ -292,7 +308,7 @@ export default function Home() {
                   </div>
                   <div className="form-group">
                     <label htmlFor="lt-amount">Investment amount</label>
-                    <select id="lt-amount" defaultValue="">
+                    <select id="lt-amount" name="amount" defaultValue="">
                       <option value="" disabled>Select range</option>
                       <option>Under ₹5 lakh</option>
                       <option>₹5 – 25 lakh</option>
@@ -303,10 +319,10 @@ export default function Home() {
                 </div>
                 <div className="form-group">
                   <label htmlFor="lt-message">Anything else? (optional)</label>
-                  <textarea id="lt-message" placeholder="Tell us about your current portfolio or any specific questions…" />
+                  <textarea id="lt-message" name="message" placeholder="Tell us about your current portfolio or any specific questions…" />
                 </div>
-                <button type="submit" className="btn btn-primary modal-submit">
-                  Send request <span className="arrow"><IconArrow size={15} /></span>
+                <button type="submit" disabled={saving} className="btn btn-primary modal-submit">
+                  {saving ? 'Sending…' : <><span>Send request</span> <span className="arrow"><IconArrow size={15} /></span></>}
                 </button>
               </form>
             </>

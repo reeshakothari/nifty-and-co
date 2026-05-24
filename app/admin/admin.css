@@ -1,0 +1,242 @@
+/* === Admin Dashboard — Nifty & Co. === */
+.admin-root {
+  display: flex; min-height: 100vh;
+  background: #07090f; color: #ecebe5;
+  font-family: 'Geist', system-ui, sans-serif;
+}
+
+/* Sidebar */
+.admin-sidebar {
+  width: 220px; flex-shrink: 0;
+  background: #0a0d18;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column;
+  padding: 0;
+  position: sticky; top: 0; height: 100vh;
+}
+.admin-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  text-decoration: none; color: #ecebe5;
+}
+.admin-logo-mark {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid #d4b06a; display: grid; place-items: center;
+  font-family: 'Instrument Serif', serif; font-size: 16px; color: #1a1407;
+  background: radial-gradient(circle at 30% 30%, #e8c684, #8a6f3c);
+  flex-shrink: 0;
+}
+.admin-logo-text { font-size: 14px; font-weight: 500; }
+.admin-logo-sub { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(236,235,229,0.45); margin-top: 1px; font-family: 'Geist Mono', monospace; }
+
+.admin-nav { flex: 1; padding: 16px 10px; display: flex; flex-direction: column; gap: 2px; }
+.admin-nav a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px;
+  font-size: 13px; color: rgba(236,235,229,0.6);
+  text-decoration: none; transition: all 0.18s;
+}
+.admin-nav a:hover { background: rgba(255,255,255,0.05); color: #ecebe5; }
+.admin-nav a.active { background: rgba(212,176,106,0.12); color: #d4b06a; }
+.admin-nav .nav-section {
+  font-family: 'Geist Mono', monospace; font-size: 9px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(236,235,229,0.28); padding: 16px 12px 6px;
+}
+
+.admin-sidebar-footer {
+  padding: 16px 10px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.admin-sidebar-footer a {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: rgba(236,235,229,0.4);
+  text-decoration: none; padding: 8px 12px; border-radius: 8px;
+  transition: color 0.18s;
+}
+.admin-sidebar-footer a:hover { color: rgba(236,235,229,0.8); }
+
+/* Main */
+.admin-main { flex: 1; overflow-y: auto; min-width: 0; }
+.admin-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: #07090f;
+  position: sticky; top: 0; z-index: 10;
+}
+.admin-page-title { font-size: 18px; font-weight: 500; }
+.admin-topbar-meta { font-size: 12px; color: rgba(236,235,229,0.4); font-family: 'Geist Mono', monospace; }
+
+.admin-body { padding: 32px; }
+
+/* Stat cards */
+.stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+@media (max-width: 1100px) { .stat-cards { grid-template-columns: repeat(2, 1fr); } }
+.stat-card {
+  background: #0a0d18; border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px; padding: 20px 22px;
+}
+.stat-card-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(236,235,229,0.45); font-family: 'Geist Mono', monospace; margin-bottom: 10px; }
+.stat-card-value { font-size: 32px; font-weight: 600; line-height: 1; }
+.stat-card-sub { font-size: 12px; color: rgba(236,235,229,0.4); margin-top: 6px; }
+.stat-card.gold .stat-card-value { color: #d4b06a; }
+.stat-card.green .stat-card-value { color: #5fb88a; }
+
+/* Section panel */
+.admin-panel {
+  background: #0a0d18; border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px; overflow: hidden; margin-bottom: 24px;
+}
+.admin-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.admin-panel-title { font-size: 13px; font-weight: 500; }
+.admin-panel-body { padding: 22px; }
+
+/* Table */
+.leads-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.leads-table th {
+  text-align: left; padding: 10px 14px;
+  font-family: 'Geist Mono', monospace; font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(236,235,229,0.4);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  white-space: nowrap;
+}
+.leads-table td {
+  padding: 13px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  vertical-align: middle;
+  color: rgba(236,235,229,0.85);
+}
+.leads-table tr:last-child td { border-bottom: none; }
+.leads-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.lead-name { font-weight: 500; color: #ecebe5; }
+.lead-email { font-size: 12px; color: rgba(236,235,229,0.5); margin-top: 2px; }
+.lead-goal { font-size: 12px; background: rgba(212,176,106,0.1); color: #d4b06a; padding: 3px 8px; border-radius: 4px; display: inline-block; }
+
+/* Status badge + selector */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-family: 'Geist Mono', monospace;
+  letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500;
+  cursor: pointer; border: none; transition: opacity 0.2s;
+}
+.status-badge:hover { opacity: 0.8; }
+.status-badge.new       { background: rgba(212,176,106,0.15); color: #d4b06a; }
+.status-badge.contacted { background: rgba(100,149,237,0.15); color: #6495ed; }
+.status-badge.converted { background: rgba(95,184,138,0.15);  color: #5fb88a; }
+.status-badge.lost      { background: rgba(226,109,109,0.15); color: #e26d6d; }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+.status-menu {
+  position: absolute; background: #141928; border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px; padding: 6px; z-index: 20; min-width: 140px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+}
+.status-menu button {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 8px 10px; border-radius: 6px; border: none;
+  background: transparent; color: #ecebe5; font-size: 12px;
+  cursor: pointer; text-align: left; transition: background 0.15s;
+}
+.status-menu button:hover { background: rgba(255,255,255,0.07); }
+
+/* Filters */
+.filter-bar {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 0; padding: 16px 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.filter-btn {
+  padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+  background: transparent; color: rgba(236,235,229,0.5); font-size: 12px;
+  cursor: pointer; font-family: 'Geist Mono', monospace; letter-spacing: 0.08em;
+  text-transform: uppercase; transition: all 0.18s;
+}
+.filter-btn:hover { border-color: rgba(255,255,255,0.2); color: #ecebe5; }
+.filter-btn.active { background: rgba(212,176,106,0.12); border-color: rgba(212,176,106,0.3); color: #d4b06a; }
+
+/* Content editor */
+.content-sections { display: flex; flex-direction: column; gap: 16px; }
+.content-section-card {
+  background: #0a0d18; border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px; overflow: hidden;
+}
+.content-section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  transition: background 0.18s;
+}
+.content-section-head:hover { background: rgba(255,255,255,0.02); }
+.content-section-title { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+.section-tag { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(236,235,229,0.35); }
+.content-section-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+.content-field { display: flex; flex-direction: column; gap: 6px; }
+.content-field label { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(236,235,229,0.4); }
+.content-field input,
+.content-field textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; color: #ecebe5; font-family: inherit; font-size: 13px;
+  padding: 10px 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+.content-field input:focus,
+.content-field textarea:focus { border-color: #d4b06a; box-shadow: 0 0 0 3px rgba(212,176,106,0.1); }
+.content-field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.content-fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 700px) { .content-fields-row { grid-template-columns: 1fr; } }
+
+.save-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px; border-radius: 8px;
+  background: rgba(212,176,106,0.15); border: 1px solid rgba(212,176,106,0.25);
+  color: #d4b06a; font-size: 12px; font-family: 'Geist Mono', monospace;
+  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+  transition: all 0.2s;
+}
+.save-btn:hover { background: rgba(212,176,106,0.22); border-color: rgba(212,176,106,0.45); }
+.save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.save-btn.saved { background: rgba(95,184,138,0.12); border-color: rgba(95,184,138,0.3); color: #5fb88a; }
+
+/* Login */
+.admin-login {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: #07090f; padding: 24px;
+}
+.admin-login-card {
+  width: 100%; max-width: 380px;
+  background: #0a0d18; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; padding: 40px;
+}
+.admin-login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+.admin-login h2 { font-family: 'Instrument Serif', serif; font-size: 26px; margin-bottom: 6px; }
+.admin-login p { font-size: 13px; color: rgba(236,235,229,0.45); margin-bottom: 28px; }
+.admin-login-error { background: rgba(226,109,109,0.1); border: 1px solid rgba(226,109,109,0.25); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #e26d6d; margin-bottom: 18px; }
+.admin-login .form-group { margin-bottom: 16px; }
+.admin-login label { display: block; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(236,235,229,0.4); margin-bottom: 8px; }
+.admin-login input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #ecebe5; font-size: 14px; padding: 12px 14px; outline: none; transition: border-color 0.2s; font-family: inherit; }
+.admin-login input:focus { border-color: #d4b06a; }
+.admin-login-btn { width: 100%; padding: 13px; border-radius: 10px; background: #d4b06a; color: #1a1407; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s; margin-top: 4px; }
+.admin-login-btn:hover { background: #e8c684; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 60px 20px; color: rgba(236,235,229,0.35); }
+.empty-state svg { margin: 0 auto 16px; display: block; opacity: 0.3; }
+.empty-state p { font-size: 13px; }
+
+/* Chips / badges */
+.chip { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; background: rgba(255,255,255,0.06); color: rgba(236,235,229,0.6); }
+
+/* Scrollbar */
+.admin-main::-webkit-scrollbar { width: 4px; }
+.admin-main::-webkit-scrollbar-track { background: transparent; }
+.admin-main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
