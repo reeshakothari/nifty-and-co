@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ScrollProgress, FloatingShapes, CursorFollower,
   LineReveal, Magnetic, MarqueeStrip, SpinSeal, PulseWidget,
@@ -11,51 +11,45 @@ import {
 } from '@/components/Sections';
 import { IconArrow, IconCalendar, IconWhatsapp } from '@/components/Icons';
 
-const marqueeRow1 = [
-  { text: 'Equity Research' }, { text: 'Portfolio Management' }, { text: 'SIP Advisory' },
-  { text: 'Mutual Funds' }, { text: 'Retirement Planning' }, { text: 'NSE · BSE Listed' },
-  { text: 'SEBI Registered' }, { text: 'Tax-Optimised Returns' },
-];
-const marqueeRow2 = [
-  { text: 'Nifty 50 Strategies', style: 'gold' }, { text: 'Mid-Cap Opportunities' },
-  { text: 'Sectoral Rotation', style: 'gold' }, { text: 'Risk Management' },
-  { text: 'IPO Analysis', style: 'gold' }, { text: 'Derivative Hedging' },
-  { text: 'ESG Portfolios', style: 'gold' }, { text: 'Wealth Preservation' },
-];
-
 export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   // Scroll reveal
   useEffect(() => {
-    const els = document.querySelectorAll('.reveal');
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); }
+    const reveal = (el: Element) => el.classList.add('in');
+    const inView = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return r.top < (window.innerHeight || 0) - 40 && r.bottom > 0;
+    };
+    const flushVisible = () => {
+      document.querySelectorAll('.reveal:not(.in)').forEach((el) => {
+        if (inView(el)) reveal(el);
       });
-    }, { threshold: 0.08 });
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
+    };
+    const raf1 = requestAnimationFrame(() => requestAnimationFrame(flushVisible));
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { reveal(e.target); obs.unobserve(e.target); } });
+    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach((el) => obs.observe(el));
+    const safety = setTimeout(() => {
+      document.querySelectorAll('.reveal:not(.in)').forEach(reveal);
+    }, 1500);
+    return () => { cancelAnimationFrame(raf1); clearTimeout(safety); obs.disconnect(); };
   }, []);
 
-  // Parallax on hero
+  // Subtle parallax — chart card lifts as you scroll
   useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
+    const card = document.querySelector<HTMLElement>('.hero .chart-card');
+    if (!card) return;
     const onScroll = () => {
-      const y = window.scrollY;
-      const bg = hero.querySelector<HTMLElement>('.hero-bg');
-      const txt = hero.querySelector<HTMLElement>('.hero-content');
-      if (bg) bg.style.transform = `translateY(${y * 0.28}px)`;
-      if (txt) txt.style.transform = `translateY(${y * 0.12}px)`;
+      const y = Math.min(120, window.scrollY * 0.15);
+      card.style.transform = `translateY(${-y}px)`;
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -64,171 +58,172 @@ export default function Home() {
   return (
     <>
       <ScrollProgress />
-      <CursorFollower />
       <FloatingShapes />
+      <CursorFollower />
+
+      <div className="ambient"></div>
 
       {/* NAV */}
-      <nav className={`nav${scrolled ? ' scrolled' : ''}`}>
-        <a href="#" className="nav-brand">
-          <span className="brand-mark">N</span>
-          <span>Nifty <span className="gold">&amp;</span> Co.</span>
-        </a>
-        <div className={`nav-links${menuOpen ? ' open' : ''}`}>
-          <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
-          <a href="#services" onClick={() => setMenuOpen(false)}>Services</a>
-          <a href="#why" onClick={() => setMenuOpen(false)}>Why Us</a>
-          <a href="#insights" onClick={() => setMenuOpen(false)}>Insights</a>
-          <a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
-        </div>
-        <div className="nav-cta">
-          <a href="tel:+919876543210" className="btn btn-ghost btn-sm">
-            Book a Call <IconCalendar size={14} />
+      <header className={`nav${scrolled ? ' scrolled' : ''}`}>
+        <div className="container nav-inner">
+          <a href="#" className="brand">
+            <div className="brand-mark"><span>N</span></div>
+            <div>
+              <div className="brand-name">Nifty &amp; Co.</div>
+              <div className="brand-sub">Chhajed Venture Capital</div>
+            </div>
           </a>
-          <button
-            className={`hamburger${menuOpen ? ' active' : ''}`}
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Menu"
-          >
-            <span /><span /><span />
-          </button>
-        </div>
-      </nav>
-
-      {/* TICKER */}
-      <div className="ticker-wrap">
-        <StockTicker />
-      </div>
-
-      {/* HERO */}
-      <section className="hero" ref={heroRef} id="home">
-        <div className="hero-bg">
-          <div className="hero-grain"></div>
-          <div className="hero-orbs">
-            <div className="orb o1"></div>
-            <div className="orb o2"></div>
-            <div className="orb o3"></div>
-          </div>
-          <div className="hero-grid-lines" aria-hidden="true"></div>
-        </div>
-
-        <div className="hero-content container">
-          <div className="hero-left">
-            <div className="hero-eyebrow reveal">
-              <span className="live-dot"></span>
-              <span>Markets Open · NSE · BSE</span>
-              <span className="sep">·</span>
-              <span className="gold">SEBI Reg. No. INZ000123456</span>
-            </div>
-
-            <h1 className="hero-heading">
-              <LineReveal
-                lines={[
-                  { text: "India's next" },
-                  { text: 'wealth chapter', cls: 'accent shimmer' },
-                  { text: 'starts here.' },
-                ]}
-                delay={200}
-                step={90}
-              />
-            </h1>
-
-            <p className="hero-sub reveal">
-              Professional equity research, SIP advisory and portfolio management—anchored in
-              rigorous analysis, delivered with the warmth of a relationship-led practice.
-            </p>
-
-            <div className="hero-actions reveal">
-              <Magnetic>
-                <a href="#contact" className="btn btn-primary">
-                  Start Investing <IconArrow size={16} />
-                </a>
-              </Magnetic>
-              <a href="#services" className="btn btn-outline">
-                Our Services
+          <nav className="nav-links">
+            <a href="#about" className="link-anim">About</a>
+            <a href="#services" className="link-anim">Services</a>
+            <a href="#process" className="link-anim">How we work</a>
+            <a href="#insights" className="link-anim">Insights</a>
+            <a href="#faq" className="link-anim">FAQ</a>
+          </nav>
+          <div className="nav-cta">
+            <a href="#advisor" className="btn btn-ghost" style={{ padding: '10px 18px', fontSize: 13 }}>Sign in</a>
+            <Magnetic strength={0.25}>
+              <a href="#start" className="btn btn-primary" style={{ padding: '10px 18px', fontSize: 13 }}>
+                Open account <span className="arrow"><IconArrow size={14} /></span>
               </a>
-            </div>
+            </Magnetic>
+          </div>
+        </div>
+      </header>
 
-            <div className="hero-stats reveal">
-              <div className="h-stat">
-                <div className="h-num">₹240<span className="h-unit">Cr+</span></div>
-                <div className="h-label">AUM Managed</div>
+      <main>
+        {/* HERO */}
+        <section className="hero">
+          <div className="container">
+            <div className="hero-grid">
+              <div style={{ position: 'relative' }}>
+                <div className="eyebrow reveal">SEBI Registered · Since 2021</div>
+                <h1 style={{ marginTop: 16 }}>
+                  <LineReveal lines={[
+                    { text: 'Your trusted' },
+                    { text: 'partner in' },
+                    { text: 'wealth creation.', cls: 'shimmer' },
+                  ]} />
+                </h1>
+                <p className="lead reveal d2" style={{ marginTop: 24 }}>
+                  Five years of expertise in equity trading, SIPs, mutual funds and portfolio management — for investors who&apos;d rather compound quietly than chase the next tip.
+                </p>
+                <div className="hero-cta reveal d3">
+                  <Magnetic>
+                    <a href="#start" className="btn btn-primary">
+                      Start investing <span className="arrow"><IconArrow /></span>
+                    </a>
+                  </Magnetic>
+                  <Magnetic strength={0.2}>
+                    <a href="#book" className="btn btn-ghost">
+                      <IconCalendar size={16} /> Book consultation
+                    </a>
+                  </Magnetic>
+                </div>
+                <div className="trust-row reveal d4">
+                  <div className="trust-item">
+                    <div className="num">5+</div>
+                    <div className="lbl">Years of expertise</div>
+                  </div>
+                  <div className="trust-item">
+                    <div className="num">1,000+</div>
+                    <div className="lbl">Investors served</div>
+                  </div>
+                  <div className="trust-item">
+                    <div className="num">₹240Cr</div>
+                    <div className="lbl">Assets advised</div>
+                  </div>
+                  <div className="trust-item">
+                    <div className="num">98%</div>
+                    <div className="lbl">Client retention</div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 32 }} className="reveal d4 hide-md">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                    <SpinSeal />
+                    <div style={{ maxWidth: 200 }}>
+                      <div style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 6 }}>Trust mark</div>
+                      <div style={{ fontFamily: 'var(--serif)', fontSize: 18, lineHeight: 1.3, color: 'var(--ink)' }}>SEBI-registered, audited, and entirely commission-free.</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="h-stat-div"></div>
-              <div className="h-stat">
-                <div className="h-num">3,200<span className="h-unit">+</span></div>
-                <div className="h-label">Active Clients</div>
-              </div>
-              <div className="h-stat-div"></div>
-              <div className="h-stat">
-                <div className="h-num">18.4<span className="h-unit">%</span></div>
-                <div className="h-label">Avg. Annual Return</div>
+
+              <div className="reveal d2" style={{ position: 'relative' }}>
+                <div className="hero-ribbon">● LIVE · NSE</div>
+                <CandlestickChart />
               </div>
             </div>
           </div>
 
-          <div className="hero-right reveal">
-            <div className="chart-container">
-              <CandlestickChart />
+          <div className="scroll-hint">
+            <svg className="growth-arrow" viewBox="0 0 72 44" aria-hidden="true">
+              <line x1="4" x2="68" y1="38" y2="38" stroke="rgba(255,255,255,0.08)" strokeDasharray="2 3" />
+              <path className="trail" d="M 4 36 L 18 28 L 28 32 L 42 18 L 56 12 L 64 6" />
+              <path className="head" d="M 56 6 L 66 4 L 64 14 Z" />
+              <circle className="dot" cx="4" cy="36" r="2.5" />
+            </svg>
+            <span className="label-row">Scroll · Growth ahead</span>
+          </div>
+        </section>
+
+        <StockTicker />
+
+        {/* LIVE MARKET PULSE */}
+        <section className="section" style={{ paddingTop: 80, paddingBottom: 40 }}>
+          <div className="container">
+            <div className="section-head reveal" style={{ marginBottom: 32 }}>
+              <div className="eyebrow">Markets · Live</div>
+              <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)' }}>
+                The pulse of India, in <span className="shimmer">real time.</span>
+              </h2>
             </div>
-            <SpinSeal />
+            <div className="reveal d1"><PulseWidget /></div>
           </div>
-        </div>
+        </section>
 
-        <div className="scroll-hint" aria-hidden="true">
-          <svg viewBox="0 0 24 38" fill="none" stroke="currentColor" strokeWidth="1.2">
-            <rect x="1" y="1" width="22" height="36" rx="11" />
-            <circle cx="12" cy="10" r="2.5" fill="currentColor">
-              <animate attributeName="cy" values="10;22;10" dur="1.8s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="1;0.2;1" dur="1.8s" repeatCount="indefinite" />
-            </circle>
-          </svg>
-          <span>Scroll</span>
-        </div>
+        {/* MARQUEE 1 */}
+        <MarqueeStrip items={[
+          { text: 'PATIENT CAPITAL' },
+          { text: 'COMPOUND', style: 'italic' },
+          { text: 'RESEARCH-LED' },
+          { text: 'INDIA', style: 'outline' },
+          { text: 'SINCE 2021' },
+          { text: 'CONVICTION', style: 'italic' },
+          { text: 'TRANSPARENT' },
+          { text: 'EQUITY', style: 'outline' },
+        ]} />
 
-        <div className="hero-ribbon">
-          {['NIFTY 50', 'SENSEX', 'BANK NIFTY', 'MIDCAP 150', 'SMALLCAP 250'].map((t) => (
-            <span key={t}>{t}</span>
-          ))}
-        </div>
-      </section>
+        <AboutSection />
+        <ServicesSection />
 
-      {/* MARQUEE */}
-      <MarqueeStrip items={marqueeRow1} />
-      <MarqueeStrip items={marqueeRow2} reverse />
+        {/* MARQUEE 2 */}
+        <MarqueeStrip reverse items={[
+          { text: 'SIP' },
+          { text: 'EQUITY', style: 'italic' },
+          { text: 'MUTUAL FUNDS' },
+          { text: 'PMS', style: 'outline' },
+          { text: 'RETIREMENT' },
+          { text: 'ADVISORY', style: 'italic' },
+          { text: 'NRI' },
+          { text: 'WEALTH', style: 'outline' },
+        ]} />
 
-      {/* PULSE */}
-      <section className="section pulse-section" id="markets">
-        <div className="container">
-          <div className="section-head reveal">
-            <div className="eyebrow">Live Market Pulse</div>
-            <h2>Real-time data, <span className="accent">real decisions.</span></h2>
-          </div>
-          <PulseWidget />
-        </div>
-      </section>
+        <WhyUsSection />
+        <ProcessSection />
+        <TestimonialsSection />
+        <InsightsSection />
+        <CTASection />
+        <FAQSection />
+      </main>
 
-      {/* SECTIONS */}
-      <AboutSection />
-      <ServicesSection />
-      <WhyUsSection />
-      <ProcessSection />
-      <TestimonialsSection />
-      <InsightsSection />
-      <CTASection />
-      <FAQSection />
-
-      {/* FOOTER */}
       <SiteFooter />
 
-      {/* WHATSAPP */}
-      <a
-        href="https://wa.me/919876543210"
-        className="whatsapp-fab"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Chat on WhatsApp"
-      >
-        <IconWhatsapp size={26} />
+      {/* FLOATING WHATSAPP */}
+      <a href="https://wa.me/919822014728" target="_blank" rel="noopener noreferrer" className="whatsapp-fab" aria-label="WhatsApp">
+        <span className="ring"></span>
+        <IconWhatsapp />
       </a>
     </>
   );
