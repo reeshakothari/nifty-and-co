@@ -79,7 +79,7 @@ export default function AdminLeads() {
   const counts = { all: leads.length, new: 0, contacted: 0, converted: 0, lost: 0 };
   leads.forEach(l => { counts[l.status]++; });
 
-  const fmt = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const fmt = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
     <div className="admin-root">

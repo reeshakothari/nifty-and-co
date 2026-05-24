@@ -1,164 +1,97 @@
 'use client';
 export const dynamic = 'force-dynamic';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Sidebar from '../Sidebar';
 import { supabase, type ContentRow } from '@/lib/supabase';
 
 type SectionMap = Record<string, Record<string, string>>;
 
-const SECTION_META: Record<string, { label: string; fields: { key: string; label: string; multiline?: boolean }[] }> = {
-  hero: {
-    label: 'Hero Section',
-    fields: [
-      { key: 'eyebrow',   label: 'Eyebrow text' },
-      { key: 'heading_1', label: 'Heading line 1' },
-      { key: 'heading_2', label: 'Heading line 2' },
-      { key: 'heading_3', label: 'Heading line 3 (shimmer)' },
-      { key: 'subtext',   label: 'Subtitle paragraph', multiline: true },
-      { key: 'stat_1_num', label: 'Stat 1 — Number' },
-      { key: 'stat_1_lbl', label: 'Stat 1 — Label' },
-      { key: 'stat_2_num', label: 'Stat 2 — Number' },
-      { key: 'stat_2_lbl', label: 'Stat 2 — Label' },
-      { key: 'stat_3_num', label: 'Stat 3 — Number' },
-      { key: 'stat_3_lbl', label: 'Stat 3 — Label' },
-      { key: 'stat_4_num', label: 'Stat 4 — Number' },
-      { key: 'stat_4_lbl', label: 'Stat 4 — Label' },
-    ],
-  },
-  about: {
-    label: 'About Section',
-    fields: [
-      { key: 'heading', label: 'Section heading' },
-      { key: 'subtext', label: 'Intro paragraph', multiline: true },
-    ],
-  },
-  cta: {
-    label: 'CTA Section',
-    fields: [
-      { key: 'heading', label: 'CTA heading' },
-      { key: 'subtext', label: 'CTA subtext', multiline: true },
-    ],
-  },
-  footer: {
-    label: 'Footer',
-    fields: [
-      { key: 'phone',   label: 'Phone number' },
-      { key: 'email',   label: 'Email address' },
-      { key: 'address', label: 'Office address' },
-    ],
-  },
-};
-
-function SectionEditor({
-  sectionKey, meta, values, onSave,
+function E({
+  value,
+  onChange,
+  tag = 'span',
+  className = '',
+  style = {},
 }: {
-  sectionKey: string;
-  meta: typeof SECTION_META[string];
-  values: Record<string, string>;
-  onSave: (section: string, updates: Record<string, string>) => Promise<void>;
+  value: string;
+  onChange: (v: string) => void;
+  tag?: string;
+  className?: string;
+  style?: React.CSSProperties;
 }) {
-  const [open, setOpen]       = useState(sectionKey === 'hero');
-  const [local, setLocal]     = useState<Record<string, string>>(values);
-  const [saving, setSaving]   = useState(false);
-  const [saved, setSaved]     = useState(false);
+  const ref = useRef<HTMLElement>(null);
+  const editingRef = useRef(false);
 
-  useEffect(() => { setLocal(values); }, [values]);
-
-  const isDirty = Object.keys(local).some(k => local[k] !== values[k]);
-
-  const pairs: Array<{ key: string; label: string; multiline?: boolean }[]> = [];
-  const fields = meta.fields;
-  for (let i = 0; i < fields.length; i += 2) {
-    if (fields[i].multiline || (fields[i + 1] && fields[i + 1].multiline)) {
-      pairs.push([fields[i]]);
-      if (fields[i + 1]) pairs.push([fields[i + 1]]);
-    } else {
-      pairs.push(fields[i + 1] ? [fields[i], fields[i + 1]] : [fields[i]]);
+  useEffect(() => {
+    if (ref.current && !editingRef.current && ref.current.textContent !== value) {
+      ref.current.textContent = value;
     }
-  }
+  }, [value]);
 
-  const handleSave = async () => {
-    setSaving(true);
-    await onSave(sectionKey, local);
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
-
+  const Tag = tag as 'span';
   return (
-    <div className="content-section-card">
-      <div className="content-section-head" onClick={() => setOpen(v => !v)}>
-        <div className="content-section-title">
-          <span>{open ? '▾' : '▸'}</span>
-          {meta.label}
-          <span className="section-tag">{sectionKey}</span>
-        </div>
-        {isDirty && <span style={{ fontSize: 10, color: '#d4b06a', fontFamily: 'Geist Mono,monospace', letterSpacing: '0.1em' }}>UNSAVED</span>}
-      </div>
-
-      {open && (
-        <div className="content-section-body">
-          {pairs.map((row, ri) => (
-            <div key={ri} className={row.length === 2 ? 'content-fields-row' : ''}>
-              {row.map(f => (
-                <div key={f.key} className="content-field">
-                  <label>{f.label}</label>
-                  {f.multiline ? (
-                    <textarea
-                      value={local[f.key] ?? ''}
-                      onChange={e => setLocal(prev => ({ ...prev, [f.key]: e.target.value }))}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      value={local[f.key] ?? ''}
-                      onChange={e => setLocal(prev => ({ ...prev, [f.key]: e.target.value }))}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
-          <div>
-            <button
-              className={`save-btn${saved ? ' saved' : ''}`}
-              onClick={handleSave}
-              disabled={saving || (!isDirty && !saved)}
-            >
-              {saved ? '✓ Saved' : saving ? 'Saving…' : 'Save changes'}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    <Tag
+      ref={ref as any}
+      contentEditable
+      suppressContentEditableWarning
+      className={`editable${className ? ` ${className}` : ''}`}
+      style={{ outline: 'none', ...style }}
+      onFocus={() => { editingRef.current = true; }}
+      onBlur={(e: React.FocusEvent<HTMLElement>) => {
+        editingRef.current = false;
+        onChange(e.currentTarget.textContent ?? '');
+      }}
+      onInput={(e: React.FormEvent<HTMLElement>) => {
+        onChange((e.currentTarget as HTMLElement).textContent ?? '');
+      }}
+    />
   );
 }
 
 export default function AdminContent() {
-  const [data, setData]     = useState<SectionMap>({});
+  const [data, setData]       = useState<SectionMap>({});
+  const [dirty, setDirty]     = useState<SectionMap>({});
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving]   = useState(false);
+  const [saved, setSaved]     = useState(false);
 
   useEffect(() => {
-    supabase
-      .from('nifty_and_co_content')
-      .select('*')
-      .then(({ data: rows }) => {
-        const map: SectionMap = {};
-        (rows as ContentRow[])?.forEach(r => {
-          if (!map[r.section]) map[r.section] = {};
-          map[r.section][r.key] = r.value;
-        });
-        setData(map);
-        setLoading(false);
+    supabase.from('nifty_and_co_content').select('*').then(({ data: rows }) => {
+      const map: SectionMap = {};
+      (rows as ContentRow[])?.forEach(r => {
+        if (!map[r.section]) map[r.section] = {};
+        map[r.section][r.key] = r.value;
       });
+      setData(map);
+      setLoading(false);
+    });
   }, []);
 
-  const handleSave = async (section: string, updates: Record<string, string>) => {
-    const upserts = Object.entries(updates).map(([key, value]) => ({
-      section, key, value, updated_at: new Date().toISOString(),
-    }));
+  const set = useCallback((section: string, key: string, value: string) => {
+    setDirty(prev => ({ ...prev, [section]: { ...(prev[section] ?? {}), [key]: value } }));
+  }, []);
+
+  const get = (section: string, key: string): string =>
+    dirty[section]?.[key] !== undefined ? dirty[section][key] : (data[section]?.[key] ?? '');
+
+  const dirtyCount = Object.values(dirty).reduce((n, s) => n + Object.keys(s).length, 0);
+
+  const saveAll = async () => {
+    if (dirtyCount === 0) return;
+    setSaving(true);
+    const upserts = Object.entries(dirty).flatMap(([section, keys]) =>
+      Object.entries(keys).map(([key, value]) => ({ section, key, value, updated_at: new Date().toISOString() }))
+    );
     await supabase.from('nifty_and_co_content').upsert(upserts, { onConflict: 'section,key' });
-    setData(prev => ({ ...prev, [section]: { ...prev[section], ...updates } }));
+    setData(prev => {
+      const next = { ...prev };
+      Object.entries(dirty).forEach(([s, kvs]) => { next[s] = { ...(next[s] ?? {}), ...kvs }; });
+      return next;
+    });
+    setDirty({});
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
   };
 
   return (
@@ -166,24 +99,97 @@ export default function AdminContent() {
       <Sidebar />
       <div className="admin-main">
         <div className="admin-topbar">
-          <div className="admin-page-title">Content Editor</div>
-          <div className="admin-topbar-meta">Changes save to Supabase and go live on next page load</div>
+          <div>
+            <div className="admin-page-title">Content Editor</div>
+            <div className="admin-topbar-meta" style={{ marginTop: 2 }}>Click any text to edit · changes go live on next page load</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {dirtyCount > 0 && (
+              <span style={{ fontSize: 10, color: '#d4b06a', fontFamily: 'Geist Mono,monospace', letterSpacing: '0.12em' }}>
+                {dirtyCount} UNSAVED {dirtyCount === 1 ? 'FIELD' : 'FIELDS'}
+              </span>
+            )}
+            <button
+              className={`save-btn${saved ? ' saved' : ''}`}
+              onClick={saveAll}
+              disabled={saving || dirtyCount === 0}
+            >
+              {saved ? '✓ Saved' : saving ? 'Saving…' : 'Save all changes'}
+            </button>
+          </div>
         </div>
 
-        <div className="admin-body">
+        <div className="admin-body" style={{ padding: 0 }}>
           {loading ? (
             <div style={{ padding: 40, textAlign: 'center', color: 'rgba(236,235,229,0.3)', fontSize: 13 }}>Loading content…</div>
           ) : (
-            <div className="content-sections">
-              {Object.entries(SECTION_META).map(([key, meta]) => (
-                <SectionEditor
-                  key={key}
-                  sectionKey={key}
-                  meta={meta}
-                  values={data[key] ?? {}}
-                  onSave={handleSave}
+            <div className="wysiwyg-preview">
+
+              {/* ─── HERO ─────────────────────────────────── */}
+              <div className="preview-section preview-hero">
+                <div className="preview-section-tag">Hero Section</div>
+                <E
+                  value={get('hero', 'eyebrow')}
+                  onChange={v => set('hero', 'eyebrow', v)}
+                  tag="div"
+                  className="preview-eyebrow"
                 />
-              ))}
+                <div className="preview-h1">
+                  <E value={get('hero', 'heading_1')} onChange={v => set('hero', 'heading_1', v)} tag="div" />
+                  <E value={get('hero', 'heading_2')} onChange={v => set('hero', 'heading_2', v)} tag="div" />
+                  <E value={get('hero', 'heading_3')} onChange={v => set('hero', 'heading_3', v)} tag="div" className="preview-gold" />
+                </div>
+                <E
+                  value={get('hero', 'subtext')}
+                  onChange={v => set('hero', 'subtext', v)}
+                  tag="p"
+                  className="preview-lead"
+                />
+                <div className="preview-trust-row">
+                  {([1, 2, 3, 4] as const).map(n => (
+                    <div key={n} className="preview-trust-item">
+                      <E value={get('hero', `stat_${n}_num`)} onChange={v => set('hero', `stat_${n}_num`, v)} className="preview-stat-num" />
+                      <E value={get('hero', `stat_${n}_lbl`)} onChange={v => set('hero', `stat_${n}_lbl`, v)} className="preview-stat-lbl" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ─── ABOUT ────────────────────────────────── */}
+              <div className="preview-section preview-about">
+                <div className="preview-section-tag">About Section</div>
+                <div className="preview-section-eyebrow">About · Chhajed Venture Capital</div>
+                <E value={get('about', 'heading')} onChange={v => set('about', 'heading', v)} tag="h2" className="preview-h2" />
+                <E value={get('about', 'subtext')} onChange={v => set('about', 'subtext', v)} tag="p" className="preview-body-p" />
+              </div>
+
+              {/* ─── CTA ──────────────────────────────────── */}
+              <div className="preview-section preview-cta">
+                <div className="preview-section-tag">CTA Section</div>
+                <div className="preview-section-eyebrow">Get started</div>
+                <E value={get('cta', 'heading')} onChange={v => set('cta', 'heading', v)} tag="h2" className="preview-h2" />
+                <E value={get('cta', 'subtext')} onChange={v => set('cta', 'subtext', v)} tag="p" className="preview-body-p" />
+              </div>
+
+              {/* ─── FOOTER ───────────────────────────────── */}
+              <div className="preview-section preview-footer">
+                <div className="preview-section-tag">Footer Contact</div>
+                <div className="preview-contact-rows">
+                  <div className="preview-contact-row">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d4b06a" strokeWidth="1.5" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.32a2 2 0 0 1 1.91-2.18H6.5a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <E value={get('footer', 'phone')} onChange={v => set('footer', 'phone', v)} className="preview-contact-text" />
+                  </div>
+                  <div className="preview-contact-row">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d4b06a" strokeWidth="1.5" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <E value={get('footer', 'email')} onChange={v => set('footer', 'email', v)} className="preview-contact-text" />
+                  </div>
+                  <div className="preview-contact-row">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d4b06a" strokeWidth="1.5" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <E value={get('footer', 'address')} onChange={v => set('footer', 'address', v)} className="preview-contact-text" />
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
         </div>
