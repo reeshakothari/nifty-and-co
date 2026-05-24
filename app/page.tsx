@@ -9,10 +9,12 @@ import {
   AboutSection, ServicesSection, WhyUsSection, ProcessSection,
   TestimonialsSection, InsightsSection, CTASection, FAQSection, SiteFooter,
 } from '@/components/Sections';
-import { IconArrow, IconCalendar, IconWhatsapp } from '@/components/Icons';
+import { IconArrow, IconCalendar, IconWhatsapp, IconCheck } from '@/components/Icons';
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -81,11 +83,14 @@ export default function Home() {
             <a href="#faq" className="link-anim">FAQ</a>
           </nav>
           <div className="nav-cta">
-            <a href="#advisor" className="btn btn-ghost" style={{ padding: '10px 18px', fontSize: 13 }}>Sign in</a>
             <Magnetic strength={0.25}>
-              <a href="#start" className="btn btn-primary" style={{ padding: '10px 18px', fontSize: 13 }}>
-                Open account <span className="arrow"><IconArrow size={14} /></span>
-              </a>
+              <button
+                onClick={() => { setModalOpen(true); setSubmitted(false); }}
+                className="btn btn-primary"
+                style={{ padding: '10px 22px', fontSize: 13 }}
+              >
+                Let&apos;s talk <span className="arrow"><IconArrow size={14} /></span>
+              </button>
             </Magnetic>
           </div>
         </div>
@@ -225,6 +230,89 @@ export default function Home() {
         <span className="ring"></span>
         <IconWhatsapp />
       </a>
+
+      {/* LET'S TALK MODAL */}
+      <div
+        className={`modal-overlay${modalOpen ? ' open' : ''}`}
+        onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false); }}
+      >
+        <div className="modal-panel" role="dialog" aria-modal="true" aria-label="Let's talk">
+          <button className="modal-close" onClick={() => setModalOpen(false)} aria-label="Close">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M1 1l10 10M11 1L1 11" />
+            </svg>
+          </button>
+
+          {submitted ? (
+            <div className="modal-success">
+              <div className="success-icon">
+                <IconCheck size={24} />
+              </div>
+              <h3>We&apos;ll be in touch.</h3>
+              <p>Thanks for reaching out. Our advisor will call you within one business day.</p>
+              <button className="btn btn-ghost" style={{ marginTop: 8 }} onClick={() => setModalOpen(false)}>
+                Close
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="modal-eyebrow">Free consultation · No commitment</div>
+              <h2 className="modal-title">Let&apos;s talk <span className="shimmer">wealth.</span></h2>
+              <p className="modal-sub">Tell us a little about yourself and we&apos;ll match you with the right advisor.</p>
+
+              <form
+                onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}
+              >
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="lt-name">Full name</label>
+                    <input id="lt-name" type="text" placeholder="Rahul Sharma" required />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="lt-phone">Phone</label>
+                    <input id="lt-phone" type="tel" placeholder="+91 98000 00000" required />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="lt-email">Email</label>
+                  <input id="lt-email" type="email" placeholder="rahul@example.com" required />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="lt-goal">Investment goal</label>
+                    <select id="lt-goal" required defaultValue="">
+                      <option value="" disabled>Select one</option>
+                      <option>Wealth creation</option>
+                      <option>Retirement planning</option>
+                      <option>SIP / Mutual funds</option>
+                      <option>Equity trading</option>
+                      <option>Portfolio review</option>
+                      <option>Tax planning</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="lt-amount">Investment amount</label>
+                    <select id="lt-amount" defaultValue="">
+                      <option value="" disabled>Select range</option>
+                      <option>Under ₹5 lakh</option>
+                      <option>₹5 – 25 lakh</option>
+                      <option>₹25 – 1 crore</option>
+                      <option>Above ₹1 crore</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="lt-message">Anything else? (optional)</label>
+                  <textarea id="lt-message" placeholder="Tell us about your current portfolio or any specific questions…" />
+                </div>
+                <button type="submit" className="btn btn-primary modal-submit">
+                  Send request <span className="arrow"><IconArrow size={15} /></span>
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
     </>
   );
 }
